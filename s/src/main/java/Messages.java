@@ -36,6 +36,11 @@ public class Messages {
     }
 
 
+    public static Messages createMessagesFromBestOffer(bestOffer best){
+        Messages m = new Messages(best.getPid(),1,best.getOffer());
+        return m;
+    }
+
     @Override
     public String toString() {
         return "Messages {" +

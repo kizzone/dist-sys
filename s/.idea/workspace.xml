@@ -25,8 +25,11 @@
   <component name="ProjectId" id="1PQ8tXpWnCshFZq8pN0zbViAQpX" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="PropertiesComponent">
-    <property name="last_opened_file_path" value="$USER_HOME$/git" />
-    <property name="settings.editor.selected.configurable" value="project.propVCSSupport.Mappings" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="project.structure.last.edited" value="Project" />
+    <property name="project.structure.proportion" value="0.0" />
+    <property name="project.structure.side.proportion" value="0.0" />
+    <property name="settings.editor.selected.configurable" value="preferences.keymap" />
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -41,9 +44,11 @@
     </option>
   </component>
   <component name="RunManager" selected="Application.hwserver">
-    <configuration name="hwserver" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+    <configuration name="hwserver" type="Application" factoryName="Application" nameIsGenerated="true">
+      <option name="ALTERNATIVE_JRE_PATH" value="1.8" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
       <option name="MAIN_CLASS_NAME" value="hwserver" />
-      <module name="s" />
+      <module name="zmq-test" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -75,11 +80,6 @@
       <item itemvalue="Application.hwserver" />
       <item itemvalue="Maven.zmq-test []" />
     </list>
-    <recent_temporary>
-      <list>
-        <item itemvalue="Application.hwserver" />
-      </list>
-    </recent_temporary>
   </component>
   <component name="SvnConfiguration">
     <configuration />
