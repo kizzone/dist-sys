@@ -8,6 +8,30 @@ import os
 currentBestValue = 0
 
 
+
+#   Thread function for reading from server the other offers  
+def offers_from_others():
+
+    global currentBestValue
+    #creating subscriber endpoint
+    context = zmq.Context.instance() 
+    soc = context.socket(zmq.SUB)
+    soc.connect("tcp://localhost:6667")
+    soc.setsockopt_string(zmq.SUBSCRIBE,"")
+
+    exit = False
+    #  Get the reply.
+    while not exit:
+        msg = soc.recv()    
+        msg = json.loads(msg) 
+        message = utilities.Messages.returnObjfromDict(msg)
+        if message.pid != os.getpid():
+            print(" \n Pid " + str(message.pid) + "  proposes an offer of " + str(message.price))
+        if currentBestValue < message.price: 
+            currentBestValue = message.price
+        
+
+
 def main():
 
     global currentBestValue
@@ -23,17 +47,17 @@ def main():
     
     #   Creating receiving data threads
     thread = threading.Thread(target=utilities.auctioner_update)
-    thread2 = threading.Thread(target=utilities.offers_from_others)
+    thread2 = threading.Thread(target=offers_from_others)
     thread.start()
     thread2.start()
 
     #   Main loop
     while not exit :
-        print("Current best offer is: ", currentBestValue)
+        
         offer = int (input("Enter an offer: ") )
         if offer < currentBestValue:
             print("Your offer must be higher then current one ")
-            break
+            continue
         
         #Creating the message object with Messages.typeoff set to 1 (it means that the auction is not over)
         msg = utilities.Messages(pid,1,offer)
@@ -42,6 +66,12 @@ def main():
         #Sending message on socked and reset it
         socket.send_string(msg.toJSON())
         socket = utilities.reset_my_socket(socket)
+
+
+
+
+
+
 
 if __name__ == "__main__":
     main()

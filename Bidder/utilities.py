@@ -1,5 +1,4 @@
 import json
-from pairclient import currentBestValue
 import os
 import zmq
 
@@ -44,27 +43,6 @@ def auctioner_update():
     os._exit(1)
 
 
-#   Thread function for reading from server the other offers  
-def offers_from_others():
-
-    global currentBestValue
-    #creating subscriber endpoint
-    context = zmq.Context.instance() 
-    soc = context.socket(zmq.SUB)
-    soc.connect("tcp://localhost:6667")
-    soc.setsockopt_string(zmq.SUBSCRIBE,"")
-
-    exit = False
-    #  Get the reply.
-    while not exit:
-        msg = soc.recv()    
-        msg = json.loads(msg) 
-        message = Messages.returnObjfromDict(msg)
-        if message.pid != os.getpid():
-            print(" \n Pid " + str(message.pid) + "  proposes an offer of " + str(message.price))
-        if currentBestValue < message.price: 
-            currentBestValue = message.price
-        
 
 #   Class messages for specifing Messages exchanged between client and server
 class Messages:
