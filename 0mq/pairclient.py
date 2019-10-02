@@ -1,99 +1,47 @@
 import zmq
-from utilities import Messages
-import os
+import utilities 
 import json
 import threading
-import logging
-import time
+import os
 
-zmq_endpoint = "tcp://localhost:5556"
-
-
-def returnObjfromDict(dictionary):
-    return Messages(dictionary["pid"], dictionary["typeoff"],dictionary["price"])
-
-def reset_my_socket(zmq_req_socket):
-  zmq_req_socket.close()
-  context = zmq.Context.instance() 
-  zmq_req_socket = context.socket(zmq.REQ)
-  zmq_req_socket.setsockopt( zmq.RCVTIMEO, 500 ) # milliseconds
-  zmq_req_socket.connect( zmq_endpoint )
-  return zmq_req_socket
-
-
-def subscriber_routine():
-    print("\nThread start", os.getpid())
-    #creating subscriber endpoint
-    context = zmq.Context.instance() 
-    soc = context.socket(zmq.SUB)
-    soc.connect("tcp://localhost:6666")
-    soc.setsockopt_string(zmq.SUBSCRIBE,"")
-
-    exit = False
-    #  Get the reply.
-    while not exit:
-        print(" \nThread waiting for update")
-        msg = soc.recv()    
-        print(" \nReceived reply")
-        msg = json.loads(msg) 
-        message = returnObjfromDict(msg)
-        print(" \nResponse", message)
-        if message.typeoff == 2:
-            if message.pid == os.getpid():
-                print("  congratulation you win the auction")
-            else:
-                print("  You didn't win the auction")
-            exit = True
-
-    soc.close()
-    os._exit(1)
-
-
-
-def subscriber_routine_2():
-    print("\n Receiving Thread start", os.getpid())
-    #creating subscriber endpoint
-    context = zmq.Context.instance() 
-    soc = context.socket(zmq.SUB)
-    soc.connect("tcp://localhost:6667")
-    soc.setsockopt_string(zmq.SUBSCRIBE,"")
-
-    exit = False
-    #  Get the reply.
-    while not exit:
-        print(" \nThread2  waiting for update")
-        msg = soc.recv()    
-        print(" \nReceived reply2")
-        msg = json.loads(msg) 
-        message = returnObjfromDict(msg)
-        print(" \nResponse2", message)
-        
+#   Shared variable among threads
+currentBestValue = 0
 
 
 def main():
 
-    #  Socket to send REQUEST to server
-    contextRequest = zmq.Context.instance() 
-    print("Connecting to response server…")
-    socket = contextRequest.socket(zmq.REQ)
-    socket.connect(zmq_endpoint)
+    global currentBestValue
     exit = False
     pid = os.getpid()
-    print("creating thread")
-    thread = threading.Thread(target=subscriber_routine)
-    thread2 = threading.Thread(target=subscriber_routine_2)
+    
+    print("Hi i'm ", pid)
+
+    #  Socket to send REQUEST to server
+    contextRequest = zmq.Context.instance() 
+    socket = contextRequest.socket(zmq.REQ)
+    socket.connect(utilities.zmq_request_endpoint)
+    
+    #   Creating receiving data threads
+    thread = threading.Thread(target=utilities.auctioner_update)
+    thread2 = threading.Thread(target=utilities.offers_from_others)
     thread.start()
     thread2.start()
-    print("entering while loop of main…")
-    while not exit :
-        print("Sending request a message …")
-        offer = int (input("Enter an offer: ") )
-        print(offer)
-        msg = Messages(pid,1,offer)
-        print("Sending …",msg.toJSON())
 
+    #   Main loop
+    while not exit :
+        print("Current best offer is: ", currentBestValue)
+        offer = int (input("Enter an offer: ") )
+        if offer < currentBestValue:
+            print("Your offer must be higher then current one ")
+            break
+        
+        #Creating the message object with Messages.typeoff set to 1 (it means that the auction is not over)
+        msg = utilities.Messages(pid,1,offer)
+        #print("Sending " + str(msg.toJSON()) + " to auctioner" )
+
+        #Sending message on socked and reset it
         socket.send_string(msg.toJSON())
-        socket = reset_my_socket(socket)
+        socket = utilities.reset_my_socket(socket)
 
 if __name__ == "__main__":
     main()
