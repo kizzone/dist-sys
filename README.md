@@ -2,4 +2,4 @@
 
 WTFPL Licence
 
- [Java doc](https://github.com/kizzone/dist-sys/docs)
+ [Java doc](https://github.com/kizzone/dist-sys/docs/index.html)
